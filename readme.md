@@ -28,12 +28,12 @@ sudo apt install mpich
 ```
 
 
-# Pre-cluster Noisy Reads
+# Pre-clusterig of the Reads
 Pre-clustering of noisy reads before running I-CONVEX algorithm has several advantages over running I-CONVEX directly on the whole dataset.
 First, it decreases the order complexity of the algorithm and eliminates its dependency to M, the number of transcripts (Centroids).
 Moreover, it enables the parallel running of I-CONVEX on different clusters. 
 
-## Run Pre-clustering (Basic Version)
+## Running Pre-clustering Algorithm (Basic Version)
 If your input fasta file is not a large-scale one and you want to run it on your PC, follow the below instructions:
 1. Move your input fasta file to the **Clustering** Folder and rename it to **reads.fasta**.
 2. Run SplitFile.py to chunk the dataset:
@@ -48,10 +48,10 @@ If your input fasta file is not a large-scale one and you want to run it on your
 At the end, the reads and their corresponding cluster identifiers will be written in **MergedClusters.csv**. Moreover, a folder **Clusters/** which contains subfolders each of which represents a cluster
 will be created.
 
-## Run Pre-clustering on a High-Performance Computing(HPC) Server (Advanced version)
+## Running Pre-clustering on a High-Performance Computing(HPC) Server (Advanced version)
 Running Pre-clustering on an HPC server makes the pre-clustering part tremendously faster; However, it has more details compared to the basic version. 
 
-### Split the Original File:
+### Spliting the Input File:
 In the first step, the original file is split into the chunks, each of which contains 50K reads.
 To run **SplitFile.py** make sure you change the name of the original file to the **reads.fasta** and put it to the **Clustering** folder. Then run as follows:
 ```
@@ -59,7 +59,7 @@ ClusteringReads/Clustering$ python SplitFile.py
 ```
 After running, there should be a **hash_functions.csv** file and **chunk1.fasta** to **chunkn.fasta** files as the outputs.
 
-### Find MinHash Signatures:
+### Finding MinHash Signatures:
 To find MinHash signatures, you should run **MPMH.py** file. Since **MPMH.py** uses multiprocessing to enhance the speed, 
 it is recommended to run it on a High-Performance Computing Server(HPC) as follows:
 ```
@@ -74,7 +74,7 @@ ClusteringReads/Clustering$ sbatch MPMH.py 2
 ClusteringReads/Clustering$ sbatch MPMH.py 3
 ```
 
-### Map Candidate Similar Pairs to the Same Bucket
+### Mapping Candidate Similar Pairs to the Same Buckets
 Using MinHash signatures as a base of a family of Locality Sensitive Hash, we can map the similar candidate pairs of noisy reads into to the same bucket. Thus, after running 
 **MultiProcessLSH.py** the candidate similar pairs will be available in the **batch1.csv** to **batchn.csv** files. To obtain these files you should run the following command:
 ```
@@ -85,7 +85,7 @@ If you do not have access to an HPC server, you can run it as follows:
 ClusteringReads/Clustering$ python MultiProcessLSH.py
 ```
 
-### Collect All of the Candidate Pairs
+### Collecting All of the Candidate Pairs
 In this step, you should run ./collector.sh to obtain the final candidate pairs. This script will merge all **batch*.csv** files and will remove the duplicate rows.
 The output will be the G.csv file.
 ```
@@ -93,7 +93,7 @@ ClusteringReads/Clustering$ ./collector.sh
 ```
 
 
-### Validate Candidate Pairs with a Convolutional Neural Network
+### Validating Candidate Pairs with a Convolutional Neural Network
 To validate the similarity of candidate pairs, a trained Convolutional Neural Network(CNN) should be executed on the obtained candidate pairs from the previous step. 
 
 ```
@@ -114,7 +114,7 @@ And then, we should merge all the mini clusters with the size less than 5:
 ClusteringReads/Clustering$ python MergeClusters.py
 ```
 
-### Create Cluster Directories:
+### Creating Cluster Directories:
 Finally, in order to run I-CONVEX on the different clusters, we should create a folder for each cluster:
 ```
 ClusteringReads/Clustering$ python CreateClusterDirectories.py
